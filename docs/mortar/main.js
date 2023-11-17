@@ -55,6 +55,7 @@ let shots;
 let mortars;
 let mortarTicks;
 let speedRatio;
+let rain;
 
 function update() {
   if (!ticks) {
@@ -65,13 +66,21 @@ function update() {
     mortarTicks = 0;
     px = 75;
     pos = vec(50, 10);
+    rain = times(30, () => {
+      const posX = rnd(0, 150);
+      const posY = rnd(0, 90);
+      return {
+        pos: vec(posX, posY),
+        speed: rnd(1.0, 2.0)
+      };
+    });
   }
   color("green");
   rect(0, 90, 150, 10);
   let scr = difficulty;
   nextBalonDist -= scr;
   if (nextBalonDist < 0) {
-    balons.push({pos: vec(rnd(20, 130), -2)});
+    balons.push({pos: vec(rnd(20, 130), -4)});
     nextBalonDist = rnd(100, 110);
   }
   if (input.isPressed) {
@@ -80,12 +89,12 @@ function update() {
       color("yellow");
       particle(75, 70, 20, 1.3, -PI/2, PI/2);
       shots.push({pos: vec(70, 70)});
-      mortars.push({pos: vec(input.pos.x, -40), vel: vec(rnd(-.15, .15), 2)});
+      mortars.push({pos: vec(input.pos.x, -40), vel: vec(rnd(-.15, .15), 2 + scr/4)});
       mortarTicks++;
     }
   }
   remove(shots, (sh) => {
-    sh.pos.y -= 20;
+    sh.pos.y -= 20 + scr/4;
     color("yellow");
     rect(sh.pos.x, sh.pos.y, 10, 10);
     return sh.pos.y < -10;
@@ -103,7 +112,7 @@ function update() {
     }
   });
   remove (balons, (b) => {
-    b.pos.y += scr/4;
+    b.pos.y += scr/3;
     color("black");
     const bc = char("a", b.pos).isColliding;
     if (bc.char.b) {
@@ -132,5 +141,14 @@ function update() {
   color("light_yellow");
   rect(67, 73, 16, 2);
   color("light_black");
-  rect(61, 87, 28, 20)
+  rect(61, 87, 28, 20);
+  rain.forEach((r) => {
+    r.pos.y += r.speed;
+    if (r.pos.y > 95) {
+      r.pos.x = rnd(0, 150);
+      r.pos.y = 0;
+    };
+    color("light_cyan");
+    box(r.pos, 1);
+  })
 }
